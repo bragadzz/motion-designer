@@ -10,6 +10,11 @@ What it does:
 - runs a reviewer and a judge loop until the cut passes;
 - stops for your approval at each preview.
 
+## Examples
+
+- [YuvexPay awards trailer](examples/yuvexpay-awards-trailer.mp4): 22 s, 1080p60, narrated, 3D pieces built from the production art.
+- [NeverMiss product trailer](examples/nevermiss-trailer.mp4): 15 s, 1080p60, narrated, real product screens.
+
 ## Install
 
 As a plugin:
