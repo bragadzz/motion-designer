@@ -12,8 +12,13 @@ What it does:
 
 ## Examples
 
-- [YuvexPay awards trailer](examples/yuvexpay-awards-trailer.mp4): 22 s, 1080p60, narrated, 3D pieces built from the production art.
-- [NeverMiss product trailer](examples/nevermiss-trailer.mp4): 15 s, 1080p60, narrated, real product screens.
+YuvexPay awards trailer: 22 s, narrated, with 3D pieces built from the production art.
+
+https://github.com/user-attachments/assets/51b87906-fa6f-4d85-8d13-921d0b660e61
+
+NeverMiss product trailer: 15 s, narrated, with real product screens.
+
+https://github.com/user-attachments/assets/f7ec0dda-1e5e-4a7b-839c-361714b50987
 
 ## Install
 
