@@ -1,0 +1,15 @@
+{
+  "name": "bragadzz",
+  "owner": {
+    "name": "Braga ZZ",
+    "url": "https://github.com/bragadzz"
+  },
+  "description": "Plugins by Braga ZZ.",
+  "plugins": [
+    {
+      "name": "motion-designer",
+      "source": "./",
+      "description": "Directs and produces short motion-design videos end to end, from brief to a verified MP4."
+    }
+  ]
+}

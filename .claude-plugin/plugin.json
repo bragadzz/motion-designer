@@ -1,0 +1,14 @@
+{
+  "name": "motion-designer",
+  "displayName": "Motion Designer",
+  "version": "1.0.0",
+  "description": "Directs and produces short motion-design videos end to end: references, frame-accurate script, narration, deterministic HTML and Three.js scene, frame render, H.264 encode, sound mix and a reviewer and judge loop.",
+  "author": {
+    "name": "Braga ZZ",
+    "url": "https://github.com/bragadzz"
+  },
+  "homepage": "https://github.com/bragadzz/motion-designer",
+  "repository": "https://github.com/bragadzz/motion-designer",
+  "license": "MIT",
+  "keywords": ["video", "motion-design", "trailer", "animation", "threejs", "narration"]
+}
