@@ -24,7 +24,8 @@ const server = createServer((req, res) => {
 await new Promise((r) => server.listen(0, "127.0.0.1", r));
 const address = `http://127.0.0.1:${server.address().port}/${relative(root, resolve(html)).split(sep).join("/")}`;
 
-const browser = await chromium.launch({ channel: "chrome", args: ["--use-angle=metal", "--ignore-gpu-blocklist"] });
+const gpu = process.platform === "darwin" ? ["--use-angle=metal"] : ["--enable-unsafe-swiftshader"];
+const browser = await chromium.launch({ channel: "chrome", args: [...gpu, "--ignore-gpu-blocklist"] });
 const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1, colorScheme: "dark" });
 page.on("pageerror", (e) => { console.error("page error:", e.message); process.exit(1); });
 page.on("console", (m) => { if (m.type() === "error" || m.type() === "warning") console.error("console:", m.text()); });

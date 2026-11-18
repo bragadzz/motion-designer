@@ -22,62 +22,54 @@ rm -rf ../frames && node render.mjs ../scene.html ../frames 60 <duration>
 ## Encode
 
 ```bash
-./encode ../frames ../out/<name>-silent.mp4 60 <mbps> <qpmax>
+node media.mjs encode ../frames ../out/<name>-silent.mp4 60 <crf>
 ```
 
 The output is:
-- H.264 High;
+- H.264 High, level 4.2 at 1080p60;
 - BT.709 in video range;
-- a keyframe every 2 s;
-- `moov` at the start (faststart), so platforms play it before it has fully downloaded.
+- a keyframe at least every 2 s, plus one at each scene change;
+- `moov` at the start (faststart), so platforms play it before it has fully downloaded;
+- no encoder name or version anywhere in the file.
 
-`qpmax` caps the QP of every frame. Without the cap, the first keyframe, which is the cover, comes out blocky. The cap overrides the bitrate target, so check the size afterwards and raise `qpmax` if the file is too big.
+`crf` sets the quality: lower is sharper and bigger, and each step of 6 roughly doubles or halves the size. Check the size afterwards.
 
-| Output | Settings | Example result for 22 s of 1080p60 with motion blur and grain |
+| Output | CRF | Example result for 22 s of 1080p60 with motion blur and grain |
 |---|---|---|
-| Final master | `30 18` | 115 MB |
-| Review preview | `20 23` | 70 MB |
-| Light copy under 28 MB | `7 33` | 25 MB |
-| Discord without Nitro, under 10 MB | `5 22` on short, cleaner cuts; raise the QP until it fits | 9 MB for 15 s |
+| Final master | 14 | 43 MB |
+| Review preview, also the light copy under 28 MB | 18 | 26 MB |
+| Under 10 MB, for Discord without Nitro or a GitHub README | 27; raise it until the file fits | 9.6 MB |
 
-Send previews to remote viewers as the light copy, since uploads above 30 MB don't reach phones.
+Send previews to remote viewers under 28 MB, since uploads above 30 MB don't reach phones.
 
 ## Verify
 
 ```bash
-./verify ../out/<name>.mp4 ../frames 0 <frame> <frame>
+node media.mjs verify ../out/<name>.mp4 ../frames 0 <frame> <frame>
 ```
 
 ```bash
-./sheet ../out/<name>.mp4 ../out/sheet-v<N>.png 0.25 6
+node media.mjs sheet ../out/<name>.mp4 ../out/sheet-v<N>.png 0.25 6
 ```
 
 ```bash
-./extract ../out/<name>.mp4 ../review/v<N>/stills 0.5
+node media.mjs extract ../out/<name>.mp4 ../review/v<N>/stills 0.5
 ```
 
 `verify` prints:
-- duration, fps, decoded frames, size and average bitrate;
-- profile and level, colour tags and range, keyframe positions, and box order (`faststart ok` or `MOOV AT END`);
-- the audio track: format, channels, rate, start and length.
+- codec, profile and level, pixel format, colour range and colour tags, size and fps;
+- duration, frame count, file size and average bitrate;
+- keyframe positions and box order (`faststart ok` or `MOOV AT END`);
+- the audio track: format, rate, channels, start, length and peak;
+- `tool traces`, which scans the header and the first frame for encoder and tool names, and reads `none` when the file is clean.
 
 `verify` also extracts the chosen frames next to the MP4, as `<name>-fNNNNN.png`, and prints each one's PSNR against the source frame. The source folder must start at frame 0. Delete the extracted PNGs before you deliver.
 
-`sheet` takes one frame every step, labelled with its time and frame number. Use it to count reading times and to catch empty frames between scenes.
-
-Then check the metadata. The only text in the header is the handler name:
-
-```bash
-head -c 60000 <file>.mp4 | strings -n 5
-```
-
-```bash
-mdls -name kMDItemCreator -name kMDItemEncodingApplications -name kMDItemWhereFroms <file>.mp4
-```
+`sheet` takes one frame every step, labelled with its time and frame number. Use it to count reading times and to catch empty frames between scenes. `extract` saves the same frames at full size, named by frame number.
 
 For the sound:
 - transcribe the final MP4 with `scribe_v1`, and confirm the transcript matches the narration text;
-- confirm the mix peaks below −1 dBFS.
+- confirm the audio peak in `verify` stays below −1 dBFS.
 
 ## Reviewer checklist
 
@@ -130,10 +122,10 @@ A new version that scores lower than the previous one on any axis has regressed,
 | `backdrop-filter` is missing in the render | Render in Chrome; headless WebKit doesn't draw it |
 | Modules or textures don't load | Serve over HTTP; `render.mjs` does it |
 | Frame 0 renders before textures arrive | Resolve `window.ready` only after every texture, model and font has loaded |
-| Blocky cover frame | Use a QP cap in `encode` |
-| Banding in dark gradients | Add fixed-seed 2 px grain, and keep a QP cap |
+| Banding in dark gradients | Add fixed-seed 2 px grain, and lower the CRF |
 | Jagged 3D edges | Draw the canvas at 2× with 8× MSAA |
-| Voice lands 13 ms late | `mux` removes the MP3 delay; never mux the MP3 another way |
+| WebGL renders slowly on a machine without a GPU | Chrome falls back to SwiftShader there; iterate with the canvas at 1× and render the final at 2× |
+| Voice lands 13 ms late | `mix` and `mux` drop the MP3 encoder delay; never convert the MP3 with another tool first |
 | Words on screen land late against the voice | The alignment runs late after pauses; time words from the audio onset |
 | An impact sound lands early | It was placed by its peak; place attack sounds by onset |
 | An effect clicks | `mix` removes DC and adds fades; never cut a WAV by hand |

@@ -15,7 +15,7 @@
   - images live in `<img>` elements or loaded textures;
   - fonts are local woff2 files.
 - **Serving**: the renderer serves the project folder over local HTTP, because ES modules and WebGL textures don't load from `file://`.
-- **Browser**: the renderer uses Chrome, not WebKit, because headless WebKit doesn't draw `backdrop-filter`.
+- **Browser**: the renderer uses Chrome, not WebKit, because headless WebKit doesn't draw `backdrop-filter`. On macOS it draws WebGL through Metal; elsewhere Chrome picks the GPU, or SwiftShader when there is none.
 
 Seed every random value. The confetti and the grain come out the same on every render.
 
@@ -71,7 +71,7 @@ Install the latest stable `three` in the project, checked with `npm view three v
 
 **Render quality.**
 - Draw the canvas at 3840×2160 with 8× MSAA, displayed at 1920×1080. That supersamples every frame.
-- Use a physical material, an environment map, and ANGLE on Metal.
+- Use a physical material and an environment map.
 
 **Light.**
 - An orbiting point light runs across the piece.
@@ -94,7 +94,7 @@ Install the latest stable `three` in the project, checked with `npm view three v
 - Answer the API with sample JSON shaped like the real responses.
 - Take screenshots at device scale 3 for phones and 2 for desktop.
 
-**iOS notifications.**
+**iOS notifications.** This needs a Mac with Xcode. On Windows or Linux, capture real screens from an Android emulator or a phone instead.
 - Use the iOS Simulator with the app installed, in dark mode.
 - Send the real payload from the product's code: `xcrun simctl push booted <bundle-id> payload.apns`.
 - Fix the status bar: `xcrun simctl status_bar booted override --time 9:41 --batteryState discharging --batteryLevel 100 --cellularBars 4 --wifiBars 3`.
@@ -108,6 +108,6 @@ Install the latest stable `three` in the project, checked with `npm view three v
 
 Smooth dark gradients band after H.264 compression. Fix it in two places:
 - **In the scene**: lay a 2 px, fixed-seed grain over the background.
-- **In the encode**: keep a QP cap.
+- **In the encode**: lower the CRF.
 
 After posting, look at how the platform recompressed the grain.

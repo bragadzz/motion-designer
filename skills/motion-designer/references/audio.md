@@ -76,9 +76,13 @@ If the product has a real sound, such as a sale chime or a notification sound, u
 
 ### Prepare
 
-- Convert each effect: `afconvert -f WAVE -d LEI16@44100 -c 1 in.mp3 out.wav`.
-- Measure each effect's energy in frequency bands. A low whoosh with most of its energy above 2 kHz sounds harsh, so prefer the darker version.
-- Build an `.m4a` sample (`afconvert -f m4af -d aac -b 160000`), and let the user hear the effects before they go into the video.
+- `mix` reads effects as WAV or MP3, so no conversion is needed.
+- Compare each effect's energy above 2 kHz with its total energy. A low whoosh with most of its energy up there sounds harsh, so prefer the darker version:
+  ```bash
+  node media.mjs ffmpeg -i whoosh-1.mp3 -af "highpass=f=2000,volumedetect" -f null -
+  ```
+  Run it again without `highpass=f=2000,` and compare the two `mean_volume` lines.
+- Build an `.m4a` sample (`node media.mjs ffmpeg -i sample.wav -c:a aac -b:a 160k sample.m4a`), and let the user hear the effects before they go into the video.
 
 ## Placement
 
@@ -101,7 +105,7 @@ If the product has a real sound, such as a sale chime or a notification sound, u
 
 `sfx/marks.txt` has one line per sound. Fields are separated by spaces or tabs.
 
-- **Effect line**: `<start_s> <name> <peak_dBFS>`. For example, `8.435 chime -16` plays `chime.wav` from the marks file's folder at 8.435 s, scaled so its peak is −16 dBFS.
+- **Effect line**: `<start_s> <name> <peak_dBFS>`. For example, `8.435 chime -16` plays `chime.wav` (or `chime.mp3`) from the marks file's folder at 8.435 s, scaled so its peak is −16 dBFS.
 - **Duck line**: `<start_s> duck <margin_dB>`. For example, `4.700 duck -3` holds the effects 3 dB under the voice, from 30 ms before that time and for 0.6 s, with at most 24 dB of reduction.
 - **Comments and blanks**: anything after `#` is ignored, and blank lines are skipped. Use comments to note each line's frame and event.
 - **Number formats**: comma decimals (`0,573`) and the Unicode minus (`−14`) are accepted.
@@ -123,23 +127,23 @@ To time a line:
 ## Mix and mux
 
 ```bash
-./mix ../narration/<take>.mp3 ../sfx/marks.txt ../sfx/track.wav <duration>
+node media.mjs mix ../narration/<take>.mp3 ../sfx/marks.txt ../sfx/track.wav <duration>
 ```
 
 ```bash
-./mux ../out/<name>-silent.mp4 ../sfx/track.wav ../out/<name>.mp4
+node media.mjs mux ../out/<name>-silent.mp4 ../sfx/track.wav ../out/<name>.mp4
 ```
 
-`mix` writes a mono, 44.1 kHz track:
+`mix` writes a mono, 44.1 kHz float WAV:
 - the voice goes in untouched: gain 1, no EQ, no compression;
 - each effect has its DC offset removed, with fades of 3 ms in and 10 ms out so it never clicks;
 - where the sum would pass −1 dBFS, only the effects come down.
 
-`mix` reads the effect WAVs from the marks file's folder and writes exactly `<duration>` seconds.
+`mix` reads the effects from the marks file's folder and writes exactly `<duration>` seconds.
 
 `mux`:
 - copies the video without re-encoding;
 - writes the audio as AAC at 128 kbps;
-- removes the MP3 encoder delay. Without that step, the voice lands 13 ms late.
+- removes the MP3 encoder delay, as `mix` does. Without that step, the voice lands 13 ms late.
 
 The audio must not be longer than the video. A shorter track is padded with silence.

@@ -5,14 +5,15 @@ description: Directs and produces short motion-design videos end to end, from br
 
 # Motion Designer
 
-Turn a brief into a polished, narrated video. The video is a web page that draws any moment of the timeline on demand; a headless Chrome photographs it frame by frame, and native macOS tools encode, mix and verify the result. Every frame is reproducible and every timing is counted in frames.
+Turn a brief into a polished, narrated video. The video is a web page that draws any moment of the timeline on demand; a headless Chrome photographs it frame by frame, and Node scripts on top of ffmpeg encode, mix and verify the result. Every frame is reproducible and every timing is counted in frames.
 
 ## Requirements
 
-- macOS with the Xcode command line tools (`swiftc`, AVFoundation, `afconvert`, `xcrun simctl`).
-- Node 20 or newer and Google Chrome.
+- macOS, Windows or Linux.
+- Node 20.11 or newer and Google Chrome.
+- ffmpeg comes from npm during setup, so nothing else needs installing.
 - For narration and sound effects: an ElevenLabs key saved in `~/.config/elevenlabs/key`.
-- No ffmpeg.
+- Only for capturing real iOS notifications: a Mac with Xcode.
 
 ## Rules
 
@@ -52,8 +53,10 @@ cp "${CLAUDE_SKILL_DIR}"/scripts/* ~/Documents/<video>/pipeline/
 ```
 
 ```bash
-cd ~/Documents/<video>/pipeline && npm i playwright-core@"$(npm view playwright-core version)" && for s in encode mux mix verify sheet extract; do swiftc -O $s.swift -o $s; done
+cd ~/Documents/<video>/pipeline && npm i playwright-core ffmpeg-static
 ```
+
+`node media.mjs <tool>` runs every step after the render: `encode`, `mux`, `mix`, `verify`, `sheet`, `extract`, and `ffmpeg` for anything else.
 
 | Path | Holds |
 |---|---|
@@ -61,7 +64,7 @@ cd ~/Documents/<video>/pipeline && npm i playwright-core@"$(npm view playwright-
 | `scene.html` | The animation |
 | `assets/` | Fonts as woff2, logos as SVG, production art, real captures |
 | `narration/` | The text, takes as MP3, and alignment JSON |
-| `sfx/` | Effects as WAV, `marks.txt`, and the mixed `track.wav` |
+| `sfx/` | Effects as WAV or MP3, `marks.txt`, and the mixed `track.wav` |
 | `frames/` | Rendered frames |
 | `out/` | Previews, contact sheets and the final |
 | `review/v<N>/` | Reviewer and judge evidence for each version |
@@ -148,7 +151,7 @@ Only after the user approves a preview:
 1. Render lossless with `--png`.
 2. Encode at a high-quality setting and mux.
 3. Run `verify` and build the contact sheet.
-4. Check the metadata.
+4. Confirm `verify` reports no tool traces.
 5. Deliver the main file plus a light copy under the upload limit.
 
 The final report contains:

@@ -37,9 +37,11 @@ git clone https://github.com/bragadzz/motion-designer.git /tmp/motion-designer &
 
 ## Requirements
 
-- macOS with the Xcode command line tools
+- macOS, Windows or Linux
 - Node 20.11+ and Google Chrome
 - Optional, for narration and sound effects: an ElevenLabs API key in `~/.config/elevenlabs/key`
+
+ffmpeg is installed by the skill through npm.
 
 ## Use
 
